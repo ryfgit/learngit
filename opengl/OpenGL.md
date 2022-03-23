@@ -45,7 +45,7 @@ showFullScreen();
 
 全屏显示窗口
 
-**在void NeHeWidget::initializeGL()中**
+**在void MyGLWidget::initializeGL()中**
 
 ```
  glClearColor( 0.0, 0.0, 0.0, 0.0 );
@@ -73,7 +73,7 @@ glDepthFunc( GL_LEQUAL );
 
 深度缓存的排序决定那个物体先画。这样就不会将一个圆形后面的正方形画到圆形上来。
 
-**在void NeHeWidget::paintGL()中**
+**在void MyGLWidget::paintGL()中**
 
 ```
 glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -87,7 +87,7 @@ glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 重置当前的模型观察矩阵。
 
-**在void NeHeWidget::resizeGL( int width, int height )中**
+**在void MyGLWidget::resizeGL( int width, int height )中**
 
 ```
 glViewport( 0, 0, (GLint)width, (GLint)height );
@@ -129,7 +129,7 @@ glViewport( 0, 0, (GLint)width, (GLint)height );
 
 用GL_TRIANGLES来创建一个三角形，GL_QUADS来创建一个四边形。
 
-只要修改NeHeWidget类中的paintGL()函数就可以了。
+只要修改MyGLWidget类中的paintGL()函数就可以了。
 
 ```
 glTranslatef( -1.5,  0.0, -6.0 );
@@ -175,7 +175,7 @@ glEnd();
 
 ### 四、给图形上色
 
-单调着色（Flat coloring）给多边形涂上固定的一种颜色。使用平滑着色（Smooth coloring）将三角形的三个顶点的不同颜色混合在一起，创建漂亮的色彩混合。只要修改NeHeWidget类中的paintGL()函数就可以了。
+单调着色（Flat coloring）给多边形涂上固定的一种颜色。使用平滑着色（Smooth coloring）将三角形的三个顶点的不同颜色混合在一起，创建漂亮的色彩混合。只要修改MyGLWidget类中的paintGL()函数就可以了。
 
 ```
 glColor3f( 1.0, 0.0, 0.0 );
@@ -235,7 +235,7 @@ GLfloat rTri;
 
 在构造函数中给rTri和rQuad赋初值，都是0.0。
 
-**在void NeHeWidget::paintGL()中**
+**在void MyGLWidget::paintGL()中**
 
 ```
 glRotatef( rTri,  0.0,  1.0,  0.0 );
@@ -266,3 +266,98 @@ glRotatef( rQuad,  1.0,  0.0,  0.0 );
 
 三维图形即为多个二维图形所构成，倘若想使之旋转应该注意其旋转中心与图形的相对位置，保证旋转效果
 
+### 七纹理映射
+
+```
+QString m_FileName;     
+
+GLuint m_Texture; 
+```
+
+  QString m_FileName用于储存图片的路径及文件名；GLuint m_Texture为一个纹理分配存储空间。如果需要不止一个纹理，可以创建一个数组来储存不同的纹理。
+
+**在MyGLWidget::MyGLWidget(QWidget *parent) :QGLWidget(parent)中**
+
+```
+m_FileName = "D:/QtOpenGL/QtImage/Nehe.bmp";        
+```
+
+储存图片路径
+
+ **在void MyGLWidget::initializeGL()中**
+
+```
+m_Texture = bindTexture(QPixmap(m_FileName));       
+```
+
+载入位图并转换成纹理     
+
+```
+glEnable(GL_TEXTURE_2D);                            
+```
+
+ 启用纹理映射
+
+**在void MyGLWidget::paintGL()中**
+
+```
+glBindTexture(GL_TEXTURE_2D, m_Texture);           
+```
+
+选择纹理   
+
+不能在glBegin()和glEnd()直接绑定纹理，那样绑定的纹理时无效的。
+
+### 八光照和键盘控制
+
+```
+bool m_Light;                                  
+```
+
+光源的开关
+
+```
+GLfloat m_xRot;                                 //x旋转角度
+    GLfloat m_yRot;                                 //y旋转角度
+    GLfloat m_xSpeed;                               //x旋转速度
+    GLfloat m_ySpeed;                               //y旋转速度
+    GLfloat m_Deep;                                 //深入屏幕的距离
+```
+
+**在MyGLWidget::MyGLWidget(QWidget *parent) : QGLWidget(parent)中**
+
+```
+    m_Light = false; 
+    m_xRot = 0.0f;
+    m_yRot = 0.0f;
+    m_xSpeed = 0.1f;
+    m_ySpeed = 0.1f;
+    m_Deep = -5.0f;
+```
+
+设置初始值
+
+**在void MyGLWidget::initializeGL()中**
+
+```
+ GLfloat LightAmbient[] = {0.5f, 0.5f, 0.5f, 1.0f};  //环境光参数
+    GLfloat LightDiffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};  //漫散光参数
+    GLfloat LightPosition[] = {0.0f, 0.0f, 2.0f, 1.0f}; //光源位置
+    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);     //设置环境光
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);     //设置漫射光
+    glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);   //设置光源位置
+    glEnable(GL_LIGHT1);                                //启动一号光源
+```
+
+**在void MyGLWidget::paintGL() 中**
+
+```
+    m_xRot += m_xSpeed;                                 //x轴旋转
+    m_yRot += m_ySpeed;                                 //y轴旋转
+```
+
+```
+glNormal3f(1.0f, 0.0f, 0.0f);
+```
+
+**glNormal3f()该函数指定一条法线，法线告诉OpenGL这个多边形的朝向，并指明多边形的正面和背面，如果没有法线，什么事情都可能发生：不该亮的面被照亮了，多边形的背面也被照亮了…还要注意的是，法线应指向多边形的外侧。**
