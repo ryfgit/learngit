@@ -266,7 +266,7 @@ glRotatef( rQuad,  1.0,  0.0,  0.0 );
 
 三维图形即为多个二维图形所构成，倘若想使之旋转应该注意其旋转中心与图形的相对位置，保证旋转效果
 
-### 七纹理映射
+### 七、纹理映射
 
 ```
 QString m_FileName;     
@@ -308,7 +308,7 @@ glBindTexture(GL_TEXTURE_2D, m_Texture);
 
 不能在glBegin()和glEnd()直接绑定纹理，那样绑定的纹理时无效的。
 
-### 八光照和键盘控制
+### 八、光照和键盘控制
 
 ```
 bool m_Light;                                  
@@ -361,3 +361,60 @@ glNormal3f(1.0f, 0.0f, 0.0f);
 ```
 
 **glNormal3f()该函数指定一条法线，法线告诉OpenGL这个多边形的朝向，并指明多边形的正面和背面，如果没有法线，什么事情都可能发生：不该亮的面被照亮了，多边形的背面也被照亮了…还要注意的是，法线应指向多边形的外侧。**
+
+### 九、色彩混合
+
+混色的定义为，将某个像素的颜色和已绘制在屏幕上与其对应的像素颜色相互结合。
+
+如何结合这两种颜色则依赖于颜色的alpha通道的分量值，以及所用的混色函数。Alpha通常是位于颜色值末尾的第4个颜色组成分量，一般都认为Alpha分量代表材料的透明度。也就是说，alpha值为0.0时所代表的材料是完全透明的，alpha值为1.0时所代表的材料则是完全不透明的。
+
+```
+bool m_Blend;
+```
+
+混合的开关
+
+**在MyGLWidget::MyGLWidget(QWidget *parent) : QGLWidget(parent)中**
+
+```
+m_Blend = false;
+```
+
+设置初始值
+
+**在void MyGLWidget::initializeGL()中**
+
+```
+glColor4f(1.0f, 1.0f, 1.0f, 0.5f);                  //全亮度，50%Alpha混合
+glBlendFunc(GL_SRC_ALPHA, GL_ONE);                  //基于源像素alpah通道值得半透明混合函数
+```
+
+### **十、看起来很酷的雾**
+
+```
+GLuint m_Fog;                                   //雾的模式
+```
+
+控制雾的模式
+
+**在MyGLWidget::MyGLWidget(QWidget *parent) : QGLWidget(parent)中**
+
+```
+m_Fog = 0;
+```
+
+初始化为0，表示雾的第一种模式
+
+**在void MyGLWidget::initializeGL()中**
+
+```
+GLfloat fogColor[] = {0.5f, 0.5f, 0.5f, 1.0f};      //雾的颜色
+glFogi(GL_FOG_MODE, GL_EXP);                        //设置雾气的初始模式
+glFogfv(GL_FOG_COLOR, fogColor);                    //设置雾的颜色
+glFogf(GL_FOG_DENSITY, 0.35);                       //设置雾的密度
+glHint(GL_FOG_HINT, GL_DONT_CARE);                  //设置系统如何计算雾气
+glFogf(GL_FOG_START, 1.0f);                         //雾的开始位置
+glFogf(GL_FOG_END, 5.0f);                           //雾的结束位置
+glEnable(GL_FOG);                                   //启动雾效果
+```
+

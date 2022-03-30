@@ -21,6 +21,8 @@ protected:
 private:
     bool fullscreen;                                //是否全屏显示
     bool m_Light;                                   //光源的开/关
+    bool m_Blend;                                   //是否混合
+    GLuint m_Fog;                                   //雾的模式
 
     GLfloat m_xRot;                                 //x旋转角度
     GLfloat m_yRot;                                 //y旋转角度
